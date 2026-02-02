@@ -18,21 +18,25 @@ export function getImageProxyUrl(): string | null {
 export function processImageUrl(originalUrl: string): string {
   if (!originalUrl) return originalUrl;
 
+  // 1. 清理并标准化 URL (确保是 HTTPS)
+  let cleanUrl = originalUrl.trim().replace(/^http:/, 'https:');
+
   const proxyUrl = getImageProxyUrl();
 
-  // 如果设置了代理，直接使用
+  // 2. 如果用户在设置里手动填了代理，优先尊重用户的设置
   if (proxyUrl) {
-    if (originalUrl.includes(proxyUrl)) return originalUrl;
-    return `${proxyUrl}${encodeURIComponent(originalUrl)}`;
+    if (cleanUrl.includes(proxyUrl)) return cleanUrl;
+    return `${proxyUrl}${encodeURIComponent(cleanUrl)}`;
   }
 
-  // 如果没有设置代理，但图片来自豆瓣，默认使用内置代理以绕过防盗链
-  // 豆瓣图片通常包含 doubanio.com
-  if (originalUrl.includes('doubanio.com') || originalUrl.includes('douban.com')) {
-    return `/api/image-proxy?url=${encodeURIComponent(originalUrl)}`;
+  // 3. 针对豆瓣图片的硬核修复 (默认采用全球最稳的 weserv.nl 代理)
+  // 豆瓣域名包：doubanio.com (图床), douban.com (数据)
+  if (cleanUrl.includes('doubanio.com') || cleanUrl.includes('douban.com')) {
+    // 使用 weserv.nl 代理，强制压缩并绕过防盗链
+    return `https://images.weserv.nl/?url=${encodeURIComponent(cleanUrl)}&we=1`;
   }
 
-  return originalUrl;
+  return cleanUrl;
 }
 
 export function cleanHtmlTags(text: string): string {
