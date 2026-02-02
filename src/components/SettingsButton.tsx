@@ -145,16 +145,34 @@ export const SettingsButton: React.FC = () => {
                 图片代理
               </h4>
               <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
-                设置代理URL以加速图片加载，留空则直接加载原图
+                解决豆瓣图片无法加载（防盗链）问题。留空则自动尝试内置代理。
               </p>
             </div>
-            <input
-              type='text'
-              className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-              placeholder='例如: https://imageproxy.example.com/?url='
-              value={imageProxyUrl}
-              onChange={(e) => handleImageProxyUrlChange(e.target.value)}
-            />
+            <div className='space-y-2'>
+              <input
+                type='text'
+                className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                placeholder='例如: https://images.weserv.nl/?url='
+                value={imageProxyUrl}
+                onChange={(e) => handleImageProxyUrlChange(e.target.value)}
+              />
+              <div className='flex gap-2 flex-wrap'>
+                <button
+                  onClick={() =>
+                    handleImageProxyUrlChange('https://images.weserv.nl/?url=')
+                  }
+                  className='text-[10px] px-2 py-0.5 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded hover:border-blue-500 transition-colors'
+                >
+                  weserv.nl (推荐)
+                </button>
+                <button
+                  onClick={() => handleImageProxyUrlChange('https://i0.wp.com/')}
+                  className='text-[10px] px-2 py-0.5 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded hover:border-blue-500 transition-colors'
+                >
+                  i0.wp.com
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 

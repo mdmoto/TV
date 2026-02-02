@@ -19,12 +19,20 @@ export function processImageUrl(originalUrl: string): string {
   if (!originalUrl) return originalUrl;
 
   const proxyUrl = getImageProxyUrl();
-  if (!proxyUrl) return originalUrl;
 
-  // 如果原始 URL 已经是代理 URL，则不再处理
-  if (originalUrl.includes(proxyUrl)) return originalUrl;
+  // 如果设置了代理，直接使用
+  if (proxyUrl) {
+    if (originalUrl.includes(proxyUrl)) return originalUrl;
+    return `${proxyUrl}${encodeURIComponent(originalUrl)}`;
+  }
 
-  return `${proxyUrl}${encodeURIComponent(originalUrl)}`;
+  // 如果没有设置代理，但图片来自豆瓣，默认使用内置代理以绕过防盗链
+  // 豆瓣图片通常包含 doubanio.com
+  if (originalUrl.includes('doubanio.com') || originalUrl.includes('douban.com')) {
+    return `/api/image-proxy?url=${encodeURIComponent(originalUrl)}`;
+  }
+
+  return originalUrl;
 }
 
 export function cleanHtmlTags(text: string): string {
@@ -108,14 +116,14 @@ export async function getVideoResolutionFromM3u8(m3u8Url: string): Promise<{
               width >= 3840
                 ? '4K' // 4K: 3840x2160
                 : width >= 2560
-                ? '2K' // 2K: 2560x1440
-                : width >= 1920
-                ? '1080p' // 1080p: 1920x1080
-                : width >= 1280
-                ? '720p' // 720p: 1280x720
-                : width >= 854
-                ? '480p'
-                : 'SD'; // 480p: 854x480
+                  ? '2K' // 2K: 2560x1440
+                  : width >= 1920
+                    ? '1080p' // 1080p: 1920x1080
+                    : width >= 1280
+                      ? '720p' // 720p: 1280x720
+                      : width >= 854
+                        ? '480p'
+                        : 'SD'; // 480p: 854x480
 
             resolve({
               quality,
@@ -188,8 +196,7 @@ export async function getVideoResolutionFromM3u8(m3u8Url: string): Promise<{
     });
   } catch (error) {
     throw new Error(
-      `Error getting video resolution: ${
-        error instanceof Error ? error.message : String(error)
+      `Error getting video resolution: ${error instanceof Error ? error.message : String(error)
       }`
     );
   }
